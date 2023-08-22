@@ -77,8 +77,15 @@ qa_report <- mutate(qa_report, inv_stat_UTC_reason = as.character(""))
 #qa_report$inv_stat_UTC_reason[is.na(qa_report$INVESTIGATION_STATUS_UNABLE_TO_COMPLETE_REASON)] <- "missing unable to complete reason |"
 
 coded_vars <- c(coded_vars, "case_class")
+#qa_report$POSITIVE_PCR_LAB_DATE_COVID19 <- parse_date_time(qa_report$POSITIVE_PCR_LAB_DATE_COVID19, "ymd")
+#parse_date_time(qa_report$POSITIVE_AG_LAB_DATE_COVID19, "ymd")
+qa_report$POSITIVE_PCR_LAB_DATE_COVID19 <- as.Date(qa_report$POSITIVE_PCR_LAB_DATE_COVID19)
+qa_report$POSITIVE_AG_LAB_DATE_COVID19 <- as.Date(qa_report$POSITIVE_AG_LAB_DATE_COVID19)
 
-qa_report<- qa_report %>% mutate(case_class= case_when((POSITIVE_AG_LAB_DATE_COVID19 == '2030-01-01' & 
+qa_report<- qa_report %>% mutate(case_class= case_when((POSITIVE_PCR_LAB_DATE_COVID19 != '2030-01-01' &
+                                                          POSITIVE_PCR_LAB_DATE_COVID19 > POSITIVE_AG_LAB_DATE_COVID19 &
+                                                          DOH_CASE_CLASSIFICATION_GENERAL == 'Probable')
+                                                       | (POSITIVE_AG_LAB_DATE_COVID19 == '2030-01-01' & 
                                                           DOH_CASE_CLASSIFICATION_GENERAL == 'Probable')
                                                        | (POSITIVE_AG_LAB_DATE_COVID19 != '2030-01-01' &
                                                             DOH_CASE_CLASSIFICATION_GENERAL == 'Confirmed')
