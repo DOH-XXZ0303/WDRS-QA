@@ -92,7 +92,7 @@ qa_report<- qa_report %>% mutate(case_class= case_when((POSITIVE_PCR_LAB_DATE_CO
                                                        | (POSITIVE_PCR_LAB_DATE_COVID19 == '2030-01-01' &
                                                             DOH_CASE_CLASSIFICATION_GENERAL == 'Confirmed')
                                                        ~ "Incorrect case classification |",
-                                                       is.na(DOH_CASE_CLASSIFICATION_GENERAL) ~ "missing unable to complete reason |",
+                                                       is.na(DOH_CASE_CLASSIFICATION_GENERAL) ~ "missing case classification |",
                                                        DOH_CASE_CLASSIFICATION_GENERAL == 'Classification pending' ~ "Update case classification |"
                                                              ))
 
