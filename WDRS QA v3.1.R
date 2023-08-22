@@ -77,7 +77,6 @@ qa_report <- mutate(qa_report, inv_stat_UTC_reason = as.character(""))
 #qa_report$inv_stat_UTC_reason[is.na(qa_report$INVESTIGATION_STATUS_UNABLE_TO_COMPLETE_REASON)] <- "missing unable to complete reason |"
 
 coded_vars <- c(coded_vars, "case_class")
-qa_report$case_class[is.na(qa_report$DOH_CASE_CLASSIFICATION_GENERAL)] <- "missing case classification |"
 
 qa_report<- qa_report %>% mutate(case_class= case_when((POSITIVE_AG_LAB_DATE_COVID19 == '2030-01-01' & 
                                                           DOH_CASE_CLASSIFICATION_GENERAL == 'Probable')
@@ -85,10 +84,10 @@ qa_report<- qa_report %>% mutate(case_class= case_when((POSITIVE_AG_LAB_DATE_COV
                                                             DOH_CASE_CLASSIFICATION_GENERAL == 'Confirmed')
                                                        | (POSITIVE_PCR_LAB_DATE_COVID19 == '2030-01-01' &
                                                             DOH_CASE_CLASSIFICATION_GENERAL == 'Confirmed')
-                                                       ~ "Incorrect case classification |"))
-
-qa_report<- qa_report %>% mutate(case_class= case_when(DOH_CASE_CLASSIFICATION_GENERAL == 'Classification pending'
-                                                       ~ "Update case classification |"))
+                                                       ~ "Incorrect case classification |",
+                                                       is.na(DOH_CASE_CLASSIFICATION_GENERAL) ~ "missing unable to complete reason |",
+                                                       DOH_CASE_CLASSIFICATION_GENERAL == 'Classification pending' ~ "Update case classification |"
+                                                             ))
 
 
 #case_when(is.na(Price) ~ "NIL", Price >= 500000 & Price <= 900000   ~ "Average", Price > 900000 ~ "High", TRUE ~ "Low"))
