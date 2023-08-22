@@ -85,7 +85,7 @@ qa_report$POSITIVE_AG_LAB_DATE_COVID19 <- as.Date(qa_report$POSITIVE_AG_LAB_DATE
 qa_report$diff_days <- difftime(qa_report$POSITIVE_PCR_LAB_DATE_COVID19, qa_report$POSITIVE_AG_LAB_DATE_COVID19, units="days")
 
 qa_report<- qa_report %>% mutate(case_class= case_when((POSITIVE_PCR_LAB_DATE_COVID19 != '2030-01-01' &
-                                                          diff_days <= 10 &
+                                                         diff_days <= 10 & diff_days >= -10 &
                                                           DOH_CASE_CLASSIFICATION_GENERAL == 'Probable')
                                                        | (POSITIVE_AG_LAB_DATE_COVID19 == '2030-01-01' & 
                                                           DOH_CASE_CLASSIFICATION_GENERAL == 'Probable')
