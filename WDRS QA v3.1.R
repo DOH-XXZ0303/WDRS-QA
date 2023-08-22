@@ -87,8 +87,6 @@ qa_report<- qa_report %>% mutate(case_class= case_when((POSITIVE_PCR_LAB_DATE_CO
                                                           DOH_CASE_CLASSIFICATION_GENERAL == 'Probable')
                                                        | (POSITIVE_AG_LAB_DATE_COVID19 == '2030-01-01' & 
                                                           DOH_CASE_CLASSIFICATION_GENERAL == 'Probable')
-                                                       | (POSITIVE_AG_LAB_DATE_COVID19 != '2030-01-01' &
-                                                            DOH_CASE_CLASSIFICATION_GENERAL == 'Confirmed')
                                                        | (POSITIVE_PCR_LAB_DATE_COVID19 == '2030-01-01' &
                                                             DOH_CASE_CLASSIFICATION_GENERAL == 'Confirmed')
                                                        ~ "Incorrect case classification |",
