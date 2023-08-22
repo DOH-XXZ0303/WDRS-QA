@@ -94,6 +94,7 @@ qa_report<- qa_report %>% mutate(case_class= case_when((POSITIVE_PCR_LAB_DATE_CO
                                                        ~ "Incorrect case classification |",
                                                        is.na(DOH_CASE_CLASSIFICATION_GENERAL) ~ "missing case classification |",
                                                        DOH_CASE_CLASSIFICATION_GENERAL == 'Classification pending' ~ "Update case classification |"
+                                                       | DOH_CASE_CLASSIFICATION_GENERAL == 'Not reportable' ~ "Update case classification |"
                                                              ))
 
 
