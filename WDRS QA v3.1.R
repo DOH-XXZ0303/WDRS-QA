@@ -129,9 +129,14 @@ qa_report$ethnic[is.na(qa_report$ETHNICITY)] <- "missing ethnicity |"
 coded_vars <- c(coded_vars, "lang")
 qa_report$lang[is.na(qa_report$LANGUAGE)] <- "missing language |"
 
-coded_vars <- c(coded_vars, "sogi")
-qa_report <- mutate(qa_report, sogi = as.character(""))
-#qa_report$sogi[is.na(qa_report$SEX_ASSIGNED_AT_BIRTH)|is.na(qa_report$SEXUAL_ORIENTATION)|is.na(qa_report$GENDER_IDENTITY)] <- "missing SOGI |"
+#coded_vars <- c(coded_vars, "sogi")
+#qa_report<- qa_report %>% mutate(sogi= case_when(AGE_YEARS >= 18
+#                                                 & ALTERNATE_CONTACT_AVAILABLE != 'Yes'
+#                                                 & (is.na(qa_report$SEXUAL_ORIENTATION)
+#                                                    | is.na(qa_report$GENDER_IDENTITY)
+#                                                    | is.na(qa_report$SEX_ASSIGNED_AT_BIRTH))
+#                                                 ~ "Missing SOGI/Sex assigned at birth"))
+
 
 
 
@@ -192,11 +197,21 @@ qa_report$any_symp[is.na(qa_report$ANY_FEVER_SUBJECTIVE_MEASURED)|
 
 ######### VACCINATION
 coded_vars <- c(coded_vars, "vacc")
-qa_report$vacc[is.na(qa_report$VACCINE_INFORMATION_AVAILABLE)] <- "missing vaccination info |"
-#qa_report <- qa_report[is.na(VACCINE_INFORMATION_AVAILABLE_DATE), vacc := "missing vaccination info |"]
-#qa_report <- qa_report[is.na(VACCINE_INFORMATION_AVAILABLE_ADMINISTERED), vacc := "missing vaccination info |"]
-#qa_report <- qa_report[is.na(VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE), vacc := "missing vaccination info |"]
-
+qa_report<- qa_report %>% mutate(vacc= case_when(
+                                                is.na(VACCINE_INFORMATION_AVAILABLE) ~ "Missing vaccination info available |",
+                                                        VACCINE_INFORMATION_AVAILABLE == 'Yes'
+                                                      & (
+                                                  #is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_DATE)|   still deciding how to document refusal for date
+                                                     is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_ADMINISTERED)
+                                                         | is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE)
+                                                          | VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE == ', '
+                                                          | VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE == ', ,*')
+                                                #The asterisk wildcard isnt working ^
+                                                      ~ "Missing vaccine details |",
+                                                        VACCINE_INFORMATION_AVAILABLE_ADMINISTERED == 'Other'
+                                                        & (is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_SOURCES_REVIEWED_SPECIFY))
+                                                       ~ "Missing vaccine type, specify |"
+                                                        ))
 
 
 
@@ -247,7 +262,6 @@ qa_report <- mutate(qa_report, rr_home_employer = as.character(""))
 ######### PREGNANCY
 coded_vars <- c(coded_vars, "pregnancy")
 qa_report<- qa_report %>% mutate(pregnancy= case_when(SEX_ASSIGNED_AT_BIRTH == 'Female' 
-                                                      & ALTERNATE_CONTACT_AVAILABLE != 'Yes'
                                                       & AGE_YEARS >= 12 & AGE_YEARS <= 55
                                                       & (is.na(qa_report$PREGNANCY_STATUS)
                                                          | is.na(qa_report$PREGNANCY_STATUS_DIAGNOSIS))
@@ -278,8 +292,9 @@ qa_report$any_prediscond[is.na(qa_report$CURRENT_SMOKER)|
 
 ######### EMPLOYER/SCHOOL
 coded_vars <- c(coded_vars, "employed")
-qa_report <- mutate(qa_report, employed = as.character(""))
-#qa_report <- qa_report[is.na(ASTHMA), employed := "missing employed |"]
+qa_report<- qa_report %>% mutate(employed= case_when(AGE_YEARS >= 16
+                                                      & (is.na(qa_report$PATIENT_EMPLOYED_STUDENT))
+                                                      ~ "Missing employed |"))
 
 coded_vars <- c(coded_vars, "student")
 qa_report$student[is.na(qa_report$PATIENT_STUDENT)] <- "missing student |"
@@ -337,6 +352,7 @@ qa_report <- data.frame(qa_report)
 qa_report$CICT_QA_NOTES<-do.call(paste,c(qa_report[coded_vars],sep = ""))
 
 qa_report$CICT_QA_NOTES<-gsub("[NA]", "", qa_report$CICT_QA_NOTES)
+
 
 ## if CICT_QA_NOTES is not blank, then CICT_QA_REVIEWED = Incomplete -- this might be hard to inc. if the past notes are still here
 
