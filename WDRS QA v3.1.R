@@ -205,7 +205,7 @@ qa_report<- qa_report %>% mutate(vacc= case_when(
                                                      is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_ADMINISTERED)
                                                          | is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE)
                                                           | VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE == ', '
-                                                          | grepl(',',VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE))
+                                                          | grepl(', , ',VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE))
                                                 #The asterisk wildcard isnt working ^
                                                       ~ "Missing vaccine details |",
                                                         VACCINE_INFORMATION_AVAILABLE_ADMINISTERED == 'Other'
