@@ -45,6 +45,18 @@ names(qa_report_county)[names(qa_report_county) == "COUNTY_NAME"] <- "ACCOUNTABL
 qa_report<- copy(qa_report_county)
 
 
+## NEW COLUMN WITH TEAM NAMES
+
+## Pull in reference spreadsheets
+team_name <- read_excel("OSS Roster.xlsx", sheet="OSS Roster")
+
+#table1$val2 <- table2$val2[match(table1$pid, table2$pid)]
+#matching team name to Investigator
+qa_report$Team <- team_name$Team[match(qa_report$INVESTIGATOR, team_name$Name)]
+
+#move Team column next to Investigator
+qa_report <- qa_report %>% relocate(Team, .after = INVESTIGATOR)
+
 
 
 ##----------------------------------------------------------------
@@ -54,13 +66,18 @@ qa_report<- copy(qa_report_county)
 
 #########ADMIN
 #########INV STATUS
-coded_vars <- "inv" 
+#coded_vars <- "date"
+#qa_report$date <- as.character(mmddyyyy, " ")
+
+
+coded_vars <- "inv"
 qa_report$inv[is.na(qa_report$INVESTIGATOR)] <- "missing investigator |"
 
 coded_vars <- c(coded_vars, "lhj_notif_date")
 qa_report$lhj_notif_date[is.na(qa_report$LHJ_NOTIFICATION_DATE)] <- "missing LHJ notification date |"
 
-coded_vars <- "inv_start_date" 
+
+coded_vars <- c(coded_vars, "inv_start_date")
 qa_report$inv_start_date[is.na(qa_report$INVESTIGATION_START_DATE)] <- "missing inv start date |"
 
 coded_vars <- c(coded_vars, "inv_comp_date")
@@ -71,6 +88,9 @@ qa_report$case_comp_date[is.na(qa_report$CASE_COMPLETE_DATE)] <- "missing case c
 
 coded_vars <- c(coded_vars, "inv_stat")
 #qa_report$inv_stat[is.na(qa_report$INVESTIGATION_STATUS)] <- "missing investigation status |"
+qa_report<- qa_report %>% mutate(inv_stat= case_when(INVESTIGATION_STATUS == 'Complete'& 
+                                                       !grepl('Complete interview',DATE_INTERVIEW_ATTEMPT_OUTCOME)
+                                                     ~ "Inv Stat & Interview Outcome does not match |"))
 
 coded_vars <- c(coded_vars, "inv_stat_UTC_reason")
 qa_report <- mutate(qa_report, inv_stat_UTC_reason = as.character(""))
@@ -129,13 +149,13 @@ qa_report$ethnic[is.na(qa_report$ETHNICITY)] <- "missing ethnicity |"
 coded_vars <- c(coded_vars, "lang")
 qa_report$lang[is.na(qa_report$LANGUAGE)] <- "missing language |"
 
-#coded_vars <- c(coded_vars, "sogi")
-#qa_report<- qa_report %>% mutate(sogi= case_when(AGE_YEARS >= 18
-#                                                 & ALTERNATE_CONTACT_AVAILABLE != 'Yes'
-#                                                 & (is.na(qa_report$SEXUAL_ORIENTATION)
-#                                                    | is.na(qa_report$GENDER_IDENTITY)
-#                                                    | is.na(qa_report$SEX_ASSIGNED_AT_BIRTH))
-#                                                 ~ "Missing SOGI/Sex assigned at birth"))
+coded_vars <- c(coded_vars, "sogi")
+qa_report<- qa_report %>% mutate(sogi= case_when(AGE_YEARS >= 18
+                                                 & ALTERNATE_CONTACT_AVAILABLE != 'Yes'
+                                                 & (is.na(qa_report$SEXUAL_ORIENTATION)
+                                                    | is.na(qa_report$GENDER_IDENTITY)
+                                                    | is.na(qa_report$SEX_ASSIGNED_AT_BIRTH))
+                                                 ~ "Missing SOGI/Sex assigned at birth"))
 
 
 
@@ -200,13 +220,11 @@ coded_vars <- c(coded_vars, "vacc")
 qa_report<- qa_report %>% mutate(vacc= case_when(
                                                 is.na(VACCINE_INFORMATION_AVAILABLE) ~ "Missing vaccination info available |",
                                                         VACCINE_INFORMATION_AVAILABLE == 'Yes'
-                                                      & (
-                                                  #is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_DATE)|   still deciding how to document refusal for date
-                                                     is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_ADMINISTERED)
+                                                      & (is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_DATE)
+                                                         | is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_ADMINISTERED)
                                                          | is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE)
-                                                          | VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE == ', '
-                                                          | grepl(', , ',VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE))
-                                                #The asterisk wildcard isnt working ^
+                                                         | VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE == ', '
+                                                         | grepl(', , ',VACCINE_INFORMATION_AVAILABLE_ADMINISTRATION_INFORMATION_SOURCE))
                                                       ~ "Missing vaccine details |",
                                                         VACCINE_INFORMATION_AVAILABLE_ADMINISTERED == 'Other'
                                                         & (is.na(qa_report$VACCINE_INFORMATION_AVAILABLE_SOURCES_REVIEWED_SPECIFY))
@@ -329,16 +347,13 @@ qa_report$cc_essential[is.na(qa_report$CARE_COORD_ESSENTIAL_ITEMS)] <- "missing 
 
 ####### CASE WHEN  ---
 
-qa_report<- qa_report %>% mutate(int_attempt_outcome_specify= case_when(DATE_INTERVIEW_ATTEMPT_OUTCOME == 'Unable to reach case/contact' &
-                                                            is.na(qa_report$DATE_INTERVIEW_ATTEMPT_OUTCOME_UNABLE_TO_REACH_CASECONTACT_SPECIFY)
-                                                      ~ "missing specify interview attempt outcome |"))
+#qa_report<- qa_report %>% mutate(int_attempt_outcome_specify= case_when(DATE_INTERVIEW_ATTEMPT_OUTCOME == 'Unable to reach case/contact' &
+#                                                            is.na(qa_report$DATE_INTERVIEW_ATTEMPT_OUTCOME_UNABLE_TO_REACH_CASECONTACT_SPECIFY)
+#                                                      ~ "missing specify interview attempt outcome |"))
 
 
 #case_when(is.na(Price) ~ "NIL", Price >= 500000 & Price <= 900000   ~ "Average", Price > 900000 ~ "High", TRUE ~ "Low"))
 
-qa_report<- qa_report %>% mutate(inv_stat= case_when(INVESTIGATION_STATUS == 'Complete'& 
-                                                       !grepl('Complete interview',DATE_INTERVIEW_ATTEMPT_OUTCOME)
-                                                     ~ "Inv Stat & Interview Outcome does not match |"))
 
 
 
