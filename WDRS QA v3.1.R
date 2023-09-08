@@ -487,15 +487,23 @@ qa_report$date <- mmddyyyy
 #Divide the dataset into 2, 1 with the empty CICT_QA_NOTES, the other is the rest (CICT_QA_NOTES not empty). 
 #Only combine the column with not empty CICT_QA_NOTES with the date, then combine the 2 dataset. 
 a<-qa_report%>%
-  filter(CICT_QA_NOTES==" ")
+  filter(CICT_QA_NOTES=="")
 
-b<-anti_join(qa_report,a,by="CASE_ID")
+b<-anti_join(qa_report,a,by="CASE_ID")%>%
+  arrange(desc(CREATE_DATE))
 
 b$CICT_QA_NOTES<-paste0(b$date,b$CICT_QA_NOTES)
 
 qa_report<-rbind(a,b)%>%
   arrange(desc(CREATE_DATE))
 
+#divide dataset by team
+team11<-b%>%
+  filter(Team=='TEAM 11')
+team13<-b%>%
+  filter(Team=='TEAM 13')
+team14<-b%>%
+  filter(Team=='TEAM 14')
 
 ## if CICT_QA_NOTES is not blank, then CICT_QA_REVIEWED = Incomplete -- this might be hard to inc. if the past notes are still here
 
@@ -509,3 +517,7 @@ qa_report<-rbind(a,b)%>%
 
 # write the combined daily as an excel file in the "_daily_download" folder
 fwrite(qa_report,paste0("//dohfltum13/Confidential/DCHS/CDE/01_Linelists_Cross Coverage/Novel CoV/01 - Epi/01 - Case inv/REDCap QA Specialists/WDRS/QA/testQA_Report ", today(), ".csv"))
+fwrite(b,paste0("//dohfltum13/Confidential/DCHS/CDE/01_Linelists_Cross Coverage/Novel CoV/01 - Epi/01 - Case inv/REDCap QA Specialists/WDRS/QA/testQA_Report_WithQA ", today(), ".csv"))
+fwrite(team11,paste0("//dohfltum13/Confidential/DCHS/CDE/01_Linelists_Cross Coverage/Novel CoV/01 - Epi/01 - Case inv/REDCap QA Specialists/WDRS/QA/testQA_Report_TEAM11 ", today(), ".csv"))
+fwrite(team13,paste0("//dohfltum13/Confidential/DCHS/CDE/01_Linelists_Cross Coverage/Novel CoV/01 - Epi/01 - Case inv/REDCap QA Specialists/WDRS/QA/testQA_Report_TEAM13 ", today(), ".csv"))
+fwrite(team14,paste0("//dohfltum13/Confidential/DCHS/CDE/01_Linelists_Cross Coverage/Novel CoV/01 - Epi/01 - Case inv/REDCap QA Specialists/WDRS/QA/testQA_Report_TEAM14 ", today(), ".csv"))
