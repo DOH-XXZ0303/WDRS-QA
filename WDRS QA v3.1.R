@@ -20,6 +20,8 @@ min_data_report <- read.csv(paste0("//dohfltum13/Confidential/DCHS/CDE/01_Lineli
 ## Make min_data_report a data table
 wdrs <- data.table(min_data_report)
 
+## Change all NULL to NA
+wdrs[wdrs == "NULL"] <-NA
 
 ## Pull in reference spreadsheets
 fips_codes <- read_excel("geographic_codes.xlsx", sheet="County")
@@ -33,7 +35,7 @@ fips_working <- fips_codes %>%
 wdrs[, ACCOUNTABLE_COUNTY := gsub("WA-", "", ACCOUNTABLE_COUNTY, ignore.case = TRUE)]
 wdrs[, ACCOUNTABLE_COUNTY := as.numeric(ACCOUNTABLE_COUNTY)]
 wdrs <- merge(x = wdrs, y = fips_working, 
-                          by.x = "ACCOUNTABLE_COUNTY", by.y = "COUNTYFP", all.x=TRUE)
+              by.x = "ACCOUNTABLE_COUNTY", by.y = "COUNTYFP", all.x=TRUE)
 
 wdrs[, ACCOUNTABLE_COUNTY := NULL]
 names(wdrs)[names(wdrs) == "COUNTY_NAME"] <- "ACCOUNTABLE_COUNTY"
@@ -373,7 +375,7 @@ a<-qa_report%>%
 b<-anti_join(qa_report,a,by="CASE_ID")%>%
   arrange(desc(CREATE_DATE))
 
-b$CICT_QA_NOTES<-paste0(b$date,b$CICT_QA_NOTES)
+b$CICT_QA_NOTES<-paste0(b$date," ",b$CICT_QA_NOTES)
 
 qa_report<-rbind(a,b)%>%
   arrange(desc(CREATE_DATE))
