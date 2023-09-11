@@ -148,11 +148,12 @@ qa_report$lang[is.na(qa_report$LANGUAGE)] <- "missing language |"
 
 coded_vars <- c(coded_vars, "sogi")
 qa_report<- qa_report %>% mutate(sogi= case_when(AGE_YEARS >= 18
-                                                 & ALTERNATE_CONTACT_AVAILABLE != 'Yes'
+                                                 & (ALTERNATE_CONTACT_AVAILABLE == 'No'
+                                                    |is.na(qa_report$ALTERNATE_CONTACT_AVAILABLE))
                                                  & (is.na(qa_report$SEXUAL_ORIENTATION)
                                                     | is.na(qa_report$GENDER_IDENTITY)
                                                     | is.na(qa_report$SEX_ASSIGNED_AT_BIRTH))
-                                                 ~ "missing SOGI/Sex assigned at birth"))
+                                                 ~ "missing SOGI/Sex assigned at birth |"))
 
 
 
