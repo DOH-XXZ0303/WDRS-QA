@@ -15,7 +15,6 @@ setwd("//dohfltum13/Confidential/DCHS/CDE/01_Linelists_Cross Coverage/Novel CoV/
 
 today <- Sys.Date()
 mmddyyyy <- toupper(as.character(today, format = '%m-%d-%Y'))
-min_data_report <- read.csv(paste0("//dohfltum13/Confidential/DCHS/CDE/01_Linelists_Cross Coverage/Novel CoV/01 - Epi/01 - Case inv/REDCap QA Specialists/WDRS/QA/SSMS SQL QA Report ", mmddyyyy, ".csv"))
 
 ##Query from WDRS
 wdrs_conn_wc <- DBI::dbConnect(odbc::odbc(),
@@ -486,23 +485,23 @@ qa_report$date <- mmddyyyy
 
 #Divide the dataset into 2, 1 with the empty CICT_QA_NOTES, the other is the rest (CICT_QA_NOTES not empty). 
 #Only combine the column with not empty CICT_QA_NOTES with the date, then combine the 2 dataset. 
-a<-qa_report%>%
+NAQA<-qa_report%>%
   filter(CICT_QA_NOTES=="")
 
-b<-anti_join(qa_report,a,by="CASE_ID")%>%
+NonNAQA<-anti_join(qa_report,NAQA,by="CASE_ID")%>%
   arrange(desc(CREATE_DATE))
 
-b$CICT_QA_NOTES<-paste0(b$date," ",b$CICT_QA_NOTES)
+NonNAQA$CICT_QA_NOTES<-paste0(NonNAQA$date," ",NonNAQA$CICT_QA_NOTES)
 
-qa_report<-rbind(a,b)%>%
+qa_report<-rbind(NAQA,NonNAQA)%>%
   arrange(desc(CREATE_DATE))
 
 #divide dataset by team
-team11<-b%>%
+team11<-NonNAQA%>%
   filter(Team=='TEAM 11')
-team13<-b%>%
+team13<-NonNAQA%>%
   filter(Team=='TEAM 13')
-team14<-b%>%
+team14<-NonNAQA%>%
   filter(Team=='TEAM 14')
 
 ## if CICT_QA_NOTES is not blank, then CICT_QA_REVIEWED = Incomplete -- this might be hard to inc. if the past notes are still here
